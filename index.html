@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#f6f7f5" />
+    <meta name="description" content="Gather — a little space for your everyday conversations." />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <title>Gather · Messages</title>
+  </head>
+  <body>
+    <main id="auth-screen" class="auth-screen">
+      <section class="auth-card" aria-labelledby="auth-title">
+        <a class="brand" href="./"><span class="brand-mark" aria-hidden="true">g</span>gather<span class="brand-dot">.</span></a>
+        <h1 id="auth-title">Your conversations, connected.</h1>
+        <p>Sign in with your phone number to keep your messages with you.</p>
+        <p id="setup-notice" class="setup-notice" hidden></p>
+        <div id="login-controls" hidden>
+          <form id="phone-form" class="stack-form">
+            <label for="phone-number">Phone number</label>
+            <input id="phone-number" type="tel" autocomplete="tel" placeholder="+94771234567" required maxlength="24" />
+            <small>Include your country code. For Sri Lanka, use +94 and omit the leading 0.</small>
+            <label class="consent"><input type="checkbox" required /> <span>I agree to receive a verification SMS. Google processes and stores my phone number for abuse prevention. SMS rates may apply.</span></label>
+            <div id="recaptcha-container"></div>
+            <button class="primary-button" type="submit">Send verification code</button>
+          </form>
+          <form id="otp-form" class="stack-form" hidden>
+            <label for="otp-code">Verification code</label>
+            <input id="otp-code" type="text" inputmode="numeric" autocomplete="one-time-code" pattern="[0-9]{6}" maxlength="6" placeholder="6-digit code" required />
+            <button class="primary-button" type="submit">Verify &amp; sign in</button>
+            <button id="restart-otp" type="button" class="text-button">Change number or request a new code</button>
+          </form>
+        </div>
+        <form id="profile-form" class="stack-form" hidden>
+          <label for="display-name">What should we call you?</label>
+          <input id="display-name" autocomplete="nickname" maxlength="60" required placeholder="Your name" />
+          <button class="primary-button" type="submit">Continue to Gather</button>
+        </form>
+        <p id="auth-status" role="status" aria-live="polite"></p>
+        <button id="auth-logout" class="text-button" type="button" hidden>Log out</button>
+      </section>
+    </main>
+    <div class="app-shell" hidden>
+      <aside class="sidebar" aria-label="Contacts and profile">
+        <a class="brand" href="./" aria-label="Gather home"><span class="brand-mark" aria-hidden="true">g</span>gather<span class="brand-dot">.</span></a>
+        <div class="sidebar-heading"><h1>Messages<span id="contact-count" class="count">0</span></h1><button class="icon-button" id="new-chat" aria-label="Start a new chat" title="Start a new chat" data-icon="compose"></button></div>
+        <label class="search"><span data-icon="search" aria-hidden="true"></span><input id="contact-search" type="search" placeholder="Search conversations" autocomplete="off" aria-label="Search conversations"/><kbd>/</kbd></label>
+        <div class="list-heading"><span>ALL MESSAGES</span><span class="tiny-dot" aria-hidden="true"></span></div>
+        <nav id="contacts" class="contacts" aria-label="Conversations"></nav>
+        <div class="sidebar-bottom">
+          <div class="account-actions"><button id="copy-id" class="text-button">Copy my account ID</button><button id="logout" class="text-button">Log out</button></div>
+          <div class="profile"><div id="profile-avatar" class="avatar avatar-self"></div><div class="profile-copy"><strong id="profile-name"></strong><span id="profile-phone"></span></div><span class="you-label">YOU</span></div>
+        </div>
+      </aside>
+      <main id="conversation" class="conversation" aria-label="Conversation">
+        <header id="chat-header" class="chat-header"></header>
+        <div class="conversation-context"><span class="tiny-dot"></span>Messages sync across your devices.</div>
+        <section id="messages" class="messages" role="log" aria-label="Message history" aria-live="polite" aria-relevant="additions"></section>
+        <div class="composer-area"><form id="composer" class="composer"><textarea id="message-input" rows="1" maxlength="4000" placeholder="Write a message…" aria-label="Message" aria-describedby="composer-hint"></textarea><button id="send-button" class="send-button" type="submit" aria-label="Send message" data-icon="send" disabled></button></form><div class="composer-footer"><span id="composer-hint">Enter to send <span>·</span> Shift + Enter for a new line</span><span class="demo-label"><span class="tiny-dot"></span> <span id="connection-status">CONNECTING</span></span></div></div>
+      </main>
+    </div>
+    <dialog id="new-chat-dialog" aria-labelledby="new-chat-title">
+      <form id="new-chat-form" class="stack-form">
+        <h2 id="new-chat-title">Start a conversation</h2>
+        <p>Ask your contact to sign in, then share their account ID using “Copy my account ID”.</p>
+        <label for="contact-id">Their account ID</label>
+        <input id="contact-id" autocomplete="off" maxlength="128" required />
+        <p id="new-chat-status" role="status"></p>
+        <button class="primary-button" type="submit">Open chat</button>
+        <button id="close-new-chat" class="text-button" type="button">Cancel</button>
+      </form>
+    </dialog>
+    <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>

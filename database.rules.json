@@ -1,0 +1,77 @@
+{
+  "rules": {
+    ".read": false,
+    ".write": false,
+    "profiles": {
+      "$uid": {
+        ".read": "auth != null && auth.token.firebase.sign_in_provider === 'phone'",
+        ".write": "auth != null && auth.token.firebase.sign_in_provider === 'phone' && auth.uid === $uid && newData.exists()",
+        ".validate": "newData.hasChildren(['displayName'])",
+        "displayName": {
+          ".validate": "newData.isString() && newData.val().length > 0 && newData.val().length <= 60"
+        },
+        "$other": {
+          ".validate": false
+        }
+      }
+    },
+    "chats": {
+      "$chatId": {
+        ".read": "auth != null && auth.token.firebase.sign_in_provider === 'phone' && (root.child('chats').child($chatId).child('memberA').val() === auth.uid || root.child('chats').child($chatId).child('memberB').val() === auth.uid)",
+        ".write": "auth != null && auth.token.firebase.sign_in_provider === 'phone' && newData.exists() && (!data.exists() || (data.child('memberA').val() === newData.child('memberA').val() && data.child('memberB').val() === newData.child('memberB').val())) && (newData.child('memberA').val() === auth.uid || newData.child('memberB').val() === auth.uid)",
+        ".validate": "newData.hasChildren(['memberA', 'memberB']) && newData.child('memberA').val() < newData.child('memberB').val() && $chatId === newData.child('memberA').val() + '~' + newData.child('memberB').val() && root.child('profiles').child(newData.child('memberA').val()).exists() && root.child('profiles').child(newData.child('memberB').val()).exists()",
+        "memberA": {
+          ".validate": "newData.isString() && newData.val().matches(/^[A-Za-z0-9_-]{1,128}$/)"
+        },
+        "memberB": {
+          ".validate": "newData.isString() && newData.val().matches(/^[A-Za-z0-9_-]{1,128}$/)"
+        },
+        "$other": {
+          ".validate": false
+        }
+      }
+    },
+    "userChats": {
+      "$uid": {
+        ".read": "auth != null && auth.token.firebase.sign_in_provider === 'phone' && auth.uid === $uid",
+        "$chatId": {
+          ".write": "auth != null && auth.token.firebase.sign_in_provider === 'phone' && (root.child('chats').child($chatId).child('memberA').val() === auth.uid || root.child('chats').child($chatId).child('memberB').val() === auth.uid) && (root.child('chats').child($chatId).child('memberA').val() === $uid || root.child('chats').child($chatId).child('memberB').val() === $uid) && newData.exists()",
+          ".validate": "newData.isString() && ((root.child('chats').child($chatId).child('memberA').val() === $uid && root.child('chats').child($chatId).child('memberB').val() === newData.val()) || (root.child('chats').child($chatId).child('memberB').val() === $uid && root.child('chats').child($chatId).child('memberA').val() === newData.val()))"
+        }
+      }
+    },
+    "messages": {
+      "$chatId": {
+        ".read": "auth != null && auth.token.firebase.sign_in_provider === 'phone' && (root.child('chats').child($chatId).child('memberA').val() === auth.uid || root.child('chats').child($chatId).child('memberB').val() === auth.uid)",
+        ".indexOn": [
+          "timestamp"
+        ],
+        "$messageId": {
+          ".write": "auth != null && auth.token.firebase.sign_in_provider === 'phone' && (root.child('chats').child($chatId).child('memberA').val() === auth.uid || root.child('chats').child($chatId).child('memberB').val() === auth.uid) && !data.exists() && newData.exists()",
+          ".validate": "newData.hasChildren(['senderId', 'text', 'timestamp'])",
+          "senderId": {
+            ".validate": "newData.val() === auth.uid"
+          },
+          "text": {
+            ".validate": "newData.isString() && newData.val().length > 0 && newData.val().length <= 4000"
+          },
+          "timestamp": {
+            ".validate": "newData.isNumber() && newData.val() === now"
+          },
+          "$other": {
+            ".validate": false
+          }
+        }
+      }
+    },
+    "readState": {
+      "$uid": {
+        ".read": "auth != null && auth.token.firebase.sign_in_provider === 'phone' && auth.uid === $uid",
+        "$chatId": {
+          ".write": "auth != null && auth.token.firebase.sign_in_provider === 'phone' && auth.uid === $uid && (root.child('chats').child($chatId).child('memberA').val() === auth.uid || root.child('chats').child($chatId).child('memberB').val() === auth.uid) && newData.exists()",
+          ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= now + 60000"
+        }
+      }
+    }
+  }
+}
