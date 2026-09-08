@@ -12,7 +12,7 @@
   <body>
     <main id="auth-screen" class="auth-screen">
       <section class="auth-card" aria-labelledby="auth-title">
-        <div class="brand-row"><a class="brand" href="./"><span class="brand-mark" aria-hidden="true">g</span>gather<span class="brand-dot">.</span></a><button class="theme-toggle" type="button" data-theme-toggle aria-label="Dark mode" aria-pressed="false">Dark mode</button></div>
+        <div class="brand-row"><a class="brand" href="./"><span class="brand-mark" aria-hidden="true">g</span>gather<span class="brand-dot">.</span></a><button id="auth-settings" class="text-button" type="button">Settings</button></div>
         <h1 id="auth-title">Your conversations, connected.</h1>
         <p>Sign in with your phone number to keep your messages with you.</p>
         <p id="setup-notice" class="setup-notice" hidden></p>
@@ -42,24 +42,45 @@
       </section>
     </main>
     <div class="app-shell" hidden>
-      <aside class="sidebar" aria-label="Contacts and profile">
-        <div class="brand-row"><a class="brand" href="./" aria-label="Gather home"><span class="brand-mark" aria-hidden="true">g</span>gather<span class="brand-dot">.</span></a><button class="theme-toggle" type="button" data-theme-toggle aria-label="Dark mode" aria-pressed="false">Dark mode</button></div>
-        <div class="sidebar-heading"><h1>Messages<span id="contact-count" class="count">0</span></h1><button class="icon-button" id="new-chat" aria-label="Start a new chat" title="Start a new chat" data-icon="compose"></button></div>
-        <label class="search"><span data-icon="search" aria-hidden="true"></span><input id="contact-search" type="search" placeholder="Search conversations" autocomplete="off" aria-label="Search conversations"/><kbd>/</kbd></label>
-        <div class="list-heading"><span>ALL MESSAGES</span><span class="tiny-dot" aria-hidden="true"></span></div>
-        <nav id="contacts" class="contacts" aria-label="Conversations"></nav>
-        <div class="sidebar-bottom">
-          <div class="account-actions"><button id="copy-id" class="text-button">Copy my account ID</button><button id="logout" class="text-button">Log out</button></div>
-          <div class="profile"><div id="profile-avatar" class="avatar avatar-self"></div><div class="profile-copy"><strong id="profile-name"></strong><span id="profile-phone"></span></div><span class="you-label">YOU</span></div>
+      <nav class="navigation-rail" aria-label="Main navigation">
+        <button id="toggle-sidebar" class="rail-button" type="button" data-icon="menu" aria-label="Toggle inbox" aria-controls="inbox-sidebar" aria-expanded="true" title="Toggle inbox"></button>
+        <button id="nav-inbox" class="rail-button rail-active" type="button" data-icon="chat" aria-label="Inbox" title="Inbox"><span id="rail-unread" class="rail-badge" hidden></span></button>
+        <button id="nav-contacts" class="rail-button" type="button" data-icon="contacts" aria-label="Start a new conversation" title="Start a new conversation"></button>
+        <button id="nav-call-preview" class="rail-button" type="button" data-icon="phone" aria-label="Preview call design" title="Preview call design"></button>
+        <button id="nav-settings" class="rail-button" type="button" data-icon="settings" aria-label="Settings" title="Settings"></button>
+        <div class="rail-bottom">
+          
+          <button id="nav-profile" class="rail-profile" type="button" aria-label="Your profile" title="Your profile"><span id="profile-avatar" class="avatar avatar-self"></span></button>
         </div>
+      </nav>
+      <aside id="inbox-sidebar" class="sidebar" aria-label="Contacts and profile">
+        <div class="sidebar-heading"><h1>Inbox <span id="contact-count" class="count">0</span></h1><button class="icon-button" id="new-chat" aria-label="Start a new chat" title="Start a new chat" data-icon="compose"></button></div>
+        <label class="search"><span data-icon="search" aria-hidden="true"></span><input id="contact-search" type="search" placeholder="Find a conversation" autocomplete="off" aria-label="Search conversations"/></label>
+        <nav id="contacts" class="contacts" aria-label="Conversations"></nav>
+        <div class="inbox-footer"><span class="tiny-dot"></span><span id="connection-status">CONNECTING</span><span class="inbox-brand">gather.</span></div>
       </aside>
       <main id="conversation" class="conversation" aria-label="Conversation">
         <header id="chat-header" class="chat-header"></header>
-        <div class="conversation-context"><span class="tiny-dot"></span>Messages sync across your devices.</div>
         <section id="messages" class="messages" role="log" aria-label="Message history" aria-live="polite" aria-relevant="additions"></section>
-        <div class="composer-area"><form id="composer" class="composer"><textarea id="message-input" rows="1" maxlength="4000" placeholder="Write a message…" aria-label="Message" aria-describedby="composer-hint"></textarea><button id="send-button" class="send-button" type="submit" aria-label="Send message" data-icon="send" disabled></button></form><div class="composer-footer"><span id="composer-hint">Enter to send <span>·</span> Shift + Enter for a new line</span><span class="demo-label"><span class="tiny-dot"></span> <span id="connection-status">CONNECTING</span></span></div></div>
+        <section id="call-preview" class="call-preview" aria-label="Call design preview" hidden></section>
+        <div class="composer-area">
+          <div id="emoji-picker" class="emoji-picker" role="group" aria-label="Choose an emoji" hidden></div>
+          <form id="composer" class="composer">
+            <button id="attachment-button" class="composer-tool" type="button" data-icon="attachment" aria-label="Attachments (coming soon)" title="Attachments — coming soon"></button>
+            <button id="emoji-button" class="composer-tool" type="button" data-icon="smile" aria-label="Choose an emoji" aria-expanded="false" aria-controls="emoji-picker" title="Choose an emoji"></button>
+            <textarea id="message-input" rows="1" maxlength="4000" placeholder="Write a message…" aria-label="Message" aria-describedby="composer-hint"></textarea>
+            <button id="send-button" class="send-button" type="submit" aria-label="Send message" data-icon="send" disabled></button>
+          </form>
+          <span id="composer-hint" class="sr-only">Enter to send. Shift + Enter for a new line.</span>
+        </div>
       </main>
     </div>
+    <dialog id="settings-dialog" class="settings-dialog" aria-labelledby="settings-title">
+      <div class="dialog-title"><h2 id="settings-title">Your space</h2><button id="close-settings" class="icon-button" type="button" data-icon="close" aria-label="Close settings"></button></div>
+      <div class="settings-profile" hidden><strong id="profile-name"></strong><span id="profile-phone"></span></div>
+      <button class="theme-toggle" type="button" data-theme-toggle aria-label="Dark mode" aria-pressed="false">Dark mode</button>
+      <div class="account-actions" hidden><button id="copy-id" class="text-button" type="button">Copy my account ID</button><button id="logout" class="text-button" type="button">Log out</button></div>
+    </dialog>
     <dialog id="new-chat-dialog" aria-labelledby="new-chat-title">
       <form id="new-chat-form" class="stack-form">
         <h2 id="new-chat-title">Start a conversation</h2>

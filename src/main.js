@@ -1,4 +1,6 @@
 import './style.css';
+import './workspace.css';
+import { initializeWorkspace, closeWorkspacePanels } from './ui/workspace.js';
 import { onAuthStateChanged, signOut } from 'firebase/auth';
 import { initializeFirebase, missingConfig } from './services/firebase.js';
 import { createFirebaseRepository, loadProfile, saveProfile } from './services/firebaseRepository.js';
@@ -34,23 +36,40 @@ function notify(message) {
 }
 function resizeComposer() {
   input.style.height = 'auto';
-  input.style.height = `${Math.min(input.scrollHeight, 144)}px`;
-  input.style.overflowY = input.scrollHeight > 144 ? 'auto' : 'hidden';
+  const contentHeight = input.scrollHeight + input.offsetHeight - input.clientHeight;
+  input.style.height = `${Math.min(contentHeight, 144)}px`;
+  input.style.overflowY = contentHeight > 144 ? 'auto' : 'hidden';
   input.disabled = !selectedId || !repository || loggingOut;
   sendButton.disabled = sending || input.disabled || !input.value.trim() || !repository?.connected;
 }
 function refreshContacts() {
   if (!repository) return;
   const contacts = repository.getContacts();
-  $('#contact-count').textContent = contacts.length;
+  $('#contact-count').textContent = `(${contacts.length})`;
+  const unread = contacts.reduce((count, contact) => count + contact.unread, 0);
+  $('#rail-unread').hidden = unread === 0;
+  $('#rail-unread').textContent = unread > 99 ? '99+' : String(unread);
   const query = search.value.trim().toLocaleLowerCase();
   renderContacts(contactsNode, contacts.filter(contact => contact.name.toLocaleLowerCase().includes(query)), selectedId, openConversation);
   if (!contacts.length && !query) contactsNode.replaceChildren(element('p', 'empty-contacts', repository.loaded ? 'No conversations yet. Use the compose button to start your first chat.' : 'Loading conversations…'));
 }
+let readFrame;
 function markVisibleRead() {
-  if (selectedId && !document.hidden && (!mobile.matches || document.body.classList.contains('chat-open'))) {
-    repository?.markRead(selectedId).catch(error => notify(friendlyError(error)));
-  }
+  cancelAnimationFrame(readFrame);
+  readFrame = requestAnimationFrame(() => {
+    if (!selectedId || !repository || document.hidden || (!$('#call-preview').hidden) || $('#settings-dialog').open || $('#new-chat-dialog').open) return;
+    if (mobile.matches && !document.body.classList.contains('chat-open')) return;
+    const viewport = messagesNode.getBoundingClientRect();
+    const visible = [...messagesNode.querySelectorAll('.message-row.received')].filter(row => {
+      const bounds = row.getBoundingClientRect();
+      return bounds.top < viewport.bottom && bounds.bottom > viewport.top && viewport.height > 0;
+    }).map(row => row.dataset.messageId);
+    repository.markRead(selectedId, visible).catch(error => notify(friendlyError(error)));
+  });
+}
+async function retryMessage(messageId) {
+  try { await repository?.retryMessage(messageId); }
+  catch (error) { if (!error.messageId) notify(friendlyError(error)); }
 }
 function refreshMessages(forceScroll = false) {
   const contact = repository?.getContacts().find(item => item.id === selectedId);
@@ -60,7 +79,7 @@ function refreshMessages(forceScroll = false) {
     return;
   }
   const nearBottom = messagesNode.scrollHeight - messagesNode.scrollTop - messagesNode.clientHeight < 100;
-  renderMessages(messagesNode, repository.getMessages(selectedId), repository.currentUser.id, contact, { scroll: forceScroll || nearBottom });
+  renderMessages(messagesNode, repository.getMessages(selectedId), repository.currentUser.id, contact, { scroll: forceScroll || nearBottom, onRetry: retryMessage });
 }
 function refresh() {
   if (!repository) return;
@@ -87,6 +106,7 @@ function openConversation(id) {
   if (!contact) return;
   if (selectedId) drafts.set(selectedId, input.value);
   selectedId = id;
+  closeWorkspacePanels();
   renderChatHeader($('#chat-header'), contact, backToContacts, notify);
   input.value = drafts.get(id) ?? '';
   document.body.classList.add('chat-open');
@@ -107,14 +127,13 @@ async function sendMessage(event) {
   input.value = '';
   drafts.delete(id);
   resizeComposer();
-  notify('Sending…');
   try {
     await repository.sendMessage(id, text);
     if (current !== session) return;
-    notify('Message saved.');
     if (selectedId === id) refreshMessages(true);
   } catch (error) {
     if (current !== session) return;
+    if (error.messageId) return; // Failed bubble retains the text and retry action.
     // Preserve anything typed while a server acknowledgement was pending.
     if (selectedId === id) input.value = [text, input.value].filter(Boolean).join('\n');
     else drafts.set(id, [text, drafts.get(id)].filter(Boolean).join('\n'));
@@ -125,6 +144,13 @@ async function sendMessage(event) {
 }
 function clearSession() {
   session++;
+  cancelAnimationFrame(readFrame);
+  $('.settings-profile').hidden = true;
+  $('#settings-dialog .account-actions').hidden = true;
+  closeWorkspacePanels();
+  $('#settings-dialog').close();
+  document.body.classList.remove('sidebar-collapsed');
+  $('#toggle-sidebar').setAttribute('aria-expanded', 'true');
   repository?.dispose();
   repository = undefined;
   selectedId = null;
@@ -146,6 +172,8 @@ function clearSession() {
   resizeComposer();
 }
 function startChat(user, profile) {
+  $('.settings-profile').hidden = false;
+  $('#settings-dialog .account-actions').hidden = false;
   $('#auth-screen').hidden = true;
   $('.app-shell').hidden = false;
   $('#profile-name').textContent = profile.displayName;
@@ -235,6 +263,7 @@ $('#copy-id').addEventListener('click', async () => {
   try { await navigator.clipboard.writeText(id); notify('Account ID copied. Share it with someone you want to chat with.'); }
   catch { notify(`Your account ID: ${id}`); }
 });
+$('#auth-settings').addEventListener('click', () => $('#settings-dialog').showModal());
 $('#logout').addEventListener('click', logout);
 $('#auth-logout').addEventListener('click', logout);
 search.addEventListener('input', refreshContacts);
@@ -244,10 +273,16 @@ input.addEventListener('keydown', event => {
 });
 $('#composer').addEventListener('submit', sendMessage);
 document.addEventListener('keydown', event => {
-  if (!repository || $('#new-chat-dialog').open) return;
+  if (!repository || $('#new-chat-dialog').open || $('#settings-dialog').open || !$('#emoji-picker').hidden || !$('#call-preview').hidden) return;
   if (event.key === '/' && !['INPUT', 'TEXTAREA'].includes(document.activeElement.tagName) && !event.metaKey && !event.ctrlKey && !event.altKey) { event.preventDefault(); backToContacts(); search.focus(); }
   if (event.key === 'Escape' && mobile.matches) backToContacts();
 });
-window.addEventListener('resize', resizeComposer);
+window.addEventListener('resize', () => { resizeComposer(); markVisibleRead(); });
+messagesNode.addEventListener('scroll', markVisibleRead, { passive: true });
+window.addEventListener('focus', markVisibleRead);
+document.addEventListener('click', markVisibleRead);
+for (const dialog of document.querySelectorAll('dialog')) dialog.addEventListener('close', markVisibleRead);
 document.addEventListener('visibilitychange', markVisibleRead);
+document.addEventListener('keyup', event => { if (event.key === 'Escape') markVisibleRead(); });
+initializeWorkspace({ notify, input, backToContacts });
 boot();

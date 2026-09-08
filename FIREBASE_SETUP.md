@@ -82,7 +82,7 @@ Use the deployed, authorized HTTPS domain for real SMS verification. Firebase ex
 2. Click **Copy my account ID**. This is your Firebase user ID; it is not a password.
 3. Have a second person sign in with a different number (or use a second fictional test account in a separate browser profile).
 4. Click the compose icon above the contact list. Paste the other person's account ID and click Open chat. Both accounts receive the conversation in their lists.
-5. Send a message. The sender sees “Message saved” after Firebase accepts it, and the other browser updates through a live listener.
+5. Send a message. The sender sees a single tick after Firebase accepts it, and the other browser updates through a live listener.
 6. Reload both browsers. The messages should remain. Sign out, sign in again, and confirm the conversation returns.
 7. Click **Log out**. Chat state and drafts are cleared and listeners are detached. Stored messages remain in Firebase for the participants' next login.
 
@@ -100,9 +100,9 @@ readState/{uid}/{chatId} = lastSeenMessageTimestamp
 
 The UI currently loads the most recent **100 messages per conversation**. All accepted messages remain stored, but older-history pagination is not implemented. Unread badges count unread messages within that loaded window. Server timestamps define message order. Contact previews are derived from messages, avoiding a separately writable message-summary record.
 
-Sending is disabled while disconnected. If a connection drops during an in-flight send, it waits for server acknowledgement; do not close the tab before “Message saved” if the message matters. Failed sends restore the text for retry. Browser drafts are not persisted. Messages use Firebase transport security and access rules; this is **not end-to-end encryption**.
+Sending is disabled while disconnected. If a connection drops during an in-flight send, it waits for server acknowledgement; do not close the tab before a single tick if the message matters. Failed sends remain as a message with a red ! button; click it to retry. Browser drafts are not persisted. Messages use Firebase transport security and access rules; this is **not end-to-end encryption**.
 
-Online presence, typing, recipient read receipts, attachments, phone-number discovery, App Check, and audio/video calling are still future work. The header does not pretend contacts are online.
+Online presence, typing, attachments, phone-number discovery, App Check, and audio/video calling are still future work. The header does not pretend contacts are online.
 
 ## Troubleshooting
 
@@ -122,3 +122,17 @@ Online presence, typing, recipient read receipts, attachments, phone-number disc
 `npm test` runs pure model and mock-adapter tests. `npm run build` validates the production bundle. Security-rule and repository integration tests are provided separately in `tests/firebase.integration.mjs`; their emulator setup is documented at the top of the file. They use a demo project and do not send SMS or touch production data.
 
 A live project and a real device are still needed to verify carrier SMS delivery, deployed-domain reCAPTCHA, and production configuration.
+
+## Message status and required rules update
+
+Publish the updated **database.rules.json** in Firebase Console → Realtime Database → Rules before using delivery/seen status. Vercel deployment does not publish database rules. Existing messages remain intact.
+
+- A small clock means the send is waiting for Firebase acknowledgement.
+- One gray tick: Firebase accepted the message; recipient delivery is not acknowledged yet.
+- Two gray ticks: the recipient's signed-in app loaded the message.
+- Two blue ticks: the received message was visible in the recipient's foreground conversation.
+- Red **!**: the send failed. Click it to retry the same message. Unsent/failed items are held in memory and cleared by reload or logout.
+
+Delivery requires the recipient to run the app; this is not a push-notification or phone-level delivery signal. Seen tracks viewport visibility, not whether a person actually read the text. A hidden tab, closed mobile conversation, or open settings/call preview does not mark messages seen. Only loaded messages (latest 100) are acknowledged. Old messages receive receipts when loaded by the recipient after this update.
+
+Receipts are stored separately at `receipts/{chatId}/{messageId}/{recipientUid}` with `delivered` and optional `seen` flags. Only the actual recipient may write their acknowledgement; neither the sender nor outsiders can forge it. These flags cannot be cleared once set. The old `readState` data remains for compatibility; new seen acknowledgements use message IDs, avoiding timestamp collisions.

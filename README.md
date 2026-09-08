@@ -36,10 +36,32 @@ Users sign in with phone OTP and choose a name. Share account IDs to start a cha
 
 There are no frontend frameworks, analytics, or third-party UI libraries. Message text is rendered with `textContent`. Firebase loads the required reCAPTCHA service for phone authentication. No API keys or credentials are committed.
 
-Presence, typing, visible read receipts, phone-number discovery, App Check, attachments, and WebRTC remain unimplemented. Message access is secured by Firebase rules, not end-to-end encryption. See the setup guide for limitations and next steps.
+Presence, typing, phone-number discovery, App Check, attachments, and WebRTC remain unimplemented. Message access is secured by Firebase rules, not end-to-end encryption. See the setup guide for limitations and next steps.
 
 ## Appearance
 
-Use the **Dark mode** toggle on the sign-in screen or beside the Gather logo. Inside a chat, the moon/sun button is available next to the call buttons, including on mobile. Its pressed state indicates dark mode is enabled.
+All appearance controls are in **Settings**. Open it using the gear/profile icon in the inbox, or Settings on the sign-in screen. Dark mode follows your system until you choose a theme; the choice persists in this browser and synchronizes across tabs.
 
-Gather follows your system appearance until you choose a theme. Your choice is saved in this browser and survives reloads and logout; open tabs stay in sync. If browser storage is blocked, switching still works for the current page. Colors live in `src/theme.css`; `public/theme.js` applies the preference before the application loads to avoid a light flash. No Firebase records are changed.
+## Inbox design
+
+The chat workspace follows the supplied dark inbox reference: a full-viewport shell, narrow navigation rail, compact conversation list, subtle message wallpaper, cyan unread/compose accents, and a pill-shaped composer. The light theme uses the same layout. Mobile switches between the inbox and full-screen conversation.
+
+Use the rail to open the inbox, start a conversation, view your profile/settings, or preview the call design. Account ID sharing and logout are now under Settings (also accessible through your rail avatar). The desktop menu button collapses the inbox.
+
+The emoji picker inserts emoji into the existing message draft. Attachments remain a coming-soon placeholder. Header call buttons open an explicitly labeled, local-only design preview of the incoming, active, and feedback cards. These previews do not use the microphone/camera, make calls, create chat events, or submit feedback. Firebase messaging remains unchanged.
+
+Workspace styling is in `src/workspace.css`, the local SVG wallpaper in `public/chat-pattern.svg`, and UI-only navigation, emoji, and call previews in `src/ui/workspace.js`.
+
+## Message status and required rules update
+
+Publish the updated **database.rules.json** in Firebase Console → Realtime Database → Rules before using delivery/seen status. Vercel deployment does not publish database rules. Existing messages remain intact.
+
+- A small clock means the send is waiting for Firebase acknowledgement.
+- One gray tick: Firebase accepted the message; recipient delivery is not acknowledged yet.
+- Two gray ticks: the recipient's signed-in app loaded the message.
+- Two blue ticks: the received message was visible in the recipient's foreground conversation.
+- Red **!**: the send failed. Click it to retry the same message. Unsent/failed items are held in memory and cleared by reload or logout.
+
+Delivery requires the recipient to run the app; this is not a push-notification or phone-level delivery signal. Seen tracks viewport visibility, not whether a person actually read the text. A hidden tab, closed mobile conversation, or open settings/call preview does not mark messages seen. Only loaded messages (latest 100) are acknowledged. Old messages receive receipts when loaded by the recipient after this update.
+
+Receipts are stored separately at `receipts/{chatId}/{messageId}/{recipientUid}` with `delivered` and optional `seen` flags. Only the actual recipient may write their acknowledgement; neither the sender nor outsiders can forge it. These flags cannot be cleared once set. The old `readState` data remains for compatibility; new seen acknowledgements use message IDs, avoiding timestamp collisions.

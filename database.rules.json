@@ -72,6 +72,26 @@
           ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= now + 60000"
         }
       }
+    },
+    "receipts": {
+      "$chatId": {
+        ".read": "auth != null && auth.token.firebase.sign_in_provider === 'phone' && (root.child('chats').child($chatId).child('memberA').val() === auth.uid || root.child('chats').child($chatId).child('memberB').val() === auth.uid)",
+        "$messageId": {
+          "$uid": {
+            ".write": "auth != null && auth.token.firebase.sign_in_provider === 'phone' && (root.child('chats').child($chatId).child('memberA').val() === auth.uid || root.child('chats').child($chatId).child('memberB').val() === auth.uid) && auth.uid === $uid && root.child('messages').child($chatId).child($messageId).exists() && root.child('messages').child($chatId).child($messageId).child('senderId').val() !== auth.uid && newData.exists()",
+            ".validate": "newData.hasChildren(['delivered']) && (!data.child('seen').exists() || newData.child('seen').val() === true)",
+            "delivered": {
+              ".validate": "newData.val() === true"
+            },
+            "seen": {
+              ".validate": "newData.val() === true"
+            },
+            "$other": {
+              ".validate": false
+            }
+          }
+        }
+      }
     }
   }
 }
