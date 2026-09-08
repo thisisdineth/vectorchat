@@ -9,6 +9,13 @@ export function renderChatHeader(container, contact, onBack, notify) {
   const info = element('div', 'header-info');
   info.append(element('h2', '', contact.name), element('span', `contact-status ${contact.online ? 'is-online' : ''}`, contact.status ?? (contact.online ? 'Online now' : 'Offline')));
   const actions = element('div', 'header-actions');
+  const themeToggle = element('button', 'theme-toggle theme-toggle-compact');
+  themeToggle.type = 'button';
+  themeToggle.dataset.themeToggle = '';
+  themeToggle.setAttribute('aria-label', 'Dark mode');
+  themeToggle.setAttribute('aria-pressed', String(document.documentElement.dataset.theme === 'dark'));
+  themeToggle.title = 'Toggle dark mode';
+  actions.append(themeToggle);
   for (const [name, label] of [['phone', 'Audio call'], ['video', 'Video call']]) {
     const button = element('button', 'icon-button call-button');
     button.type = 'button';

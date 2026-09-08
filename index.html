@@ -6,12 +6,13 @@
     <meta name="theme-color" content="#f6f7f5" />
     <meta name="description" content="Gather — a little space for your everyday conversations." />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <script src="/theme.js"></script>
     <title>Gather · Messages</title>
   </head>
   <body>
     <main id="auth-screen" class="auth-screen">
       <section class="auth-card" aria-labelledby="auth-title">
-        <a class="brand" href="./"><span class="brand-mark" aria-hidden="true">g</span>gather<span class="brand-dot">.</span></a>
+        <div class="brand-row"><a class="brand" href="./"><span class="brand-mark" aria-hidden="true">g</span>gather<span class="brand-dot">.</span></a><button class="theme-toggle" type="button" data-theme-toggle aria-label="Dark mode" aria-pressed="false">Dark mode</button></div>
         <h1 id="auth-title">Your conversations, connected.</h1>
         <p>Sign in with your phone number to keep your messages with you.</p>
         <p id="setup-notice" class="setup-notice" hidden></p>
@@ -42,7 +43,7 @@
     </main>
     <div class="app-shell" hidden>
       <aside class="sidebar" aria-label="Contacts and profile">
-        <a class="brand" href="./" aria-label="Gather home"><span class="brand-mark" aria-hidden="true">g</span>gather<span class="brand-dot">.</span></a>
+        <div class="brand-row"><a class="brand" href="./" aria-label="Gather home"><span class="brand-mark" aria-hidden="true">g</span>gather<span class="brand-dot">.</span></a><button class="theme-toggle" type="button" data-theme-toggle aria-label="Dark mode" aria-pressed="false">Dark mode</button></div>
         <div class="sidebar-heading"><h1>Messages<span id="contact-count" class="count">0</span></h1><button class="icon-button" id="new-chat" aria-label="Start a new chat" title="Start a new chat" data-icon="compose"></button></div>
         <label class="search"><span data-icon="search" aria-hidden="true"></span><input id="contact-search" type="search" placeholder="Search conversations" autocomplete="off" aria-label="Search conversations"/><kbd>/</kbd></label>
         <div class="list-heading"><span>ALL MESSAGES</span><span class="tiny-dot" aria-hidden="true"></span></div>

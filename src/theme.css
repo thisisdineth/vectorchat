@@ -1,0 +1,143 @@
+/* Theme controls are available before sign-in, in the sidebar, and inside chats. */
+.brand-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin: 33px 24px 39px 28px;
+}
+.brand-row .brand { margin: 0; }
+.auth-card .brand-row { margin: 0 0 36px; }
+.auth-card .brand-row .brand { margin: 0; }
+.theme-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  gap: 7px;
+  min-height: 40px;
+  padding: 8px 11px;
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  color: #47604f;
+  background: transparent;
+  font-size: 11px;
+}
+.theme-toggle:hover { background: #edf3e9; }
+.theme-toggle::before { content: '☾'; font-size: 20px; line-height: 1; }
+.theme-toggle[aria-pressed="true"]::before { content: '☀'; }
+.theme-toggle-compact { width: 36px; min-height: 36px; padding: 0; border-radius: 50%; }
+.header-info { min-width: 0; }
+.header-info h2 { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+/* Dark colors are centralized here; layout and the original light palette stay shared. */
+:root[data-theme="dark"] {
+  --green: #397455;
+  --line: #33443a;
+  --muted: #a5b6aa;
+  --surface: #1c2721;
+  --canvas: #151d19;
+  --raised: #25332b;
+  --hover: #2b3c31;
+  --selected: #304736;
+  --text: #e2ebe3;
+  --secondary: #acbdae;
+  --accent: #a1d3a6;
+  color: var(--text);
+  background: #101712;
+  color-scheme: dark;
+}
+[data-theme="dark"] .app-shell,
+[data-theme="dark"] .sidebar,
+[data-theme="dark"] .chat-header,
+[data-theme="dark"] .auth-card,
+[data-theme="dark"] dialog,
+[data-theme="dark"] .composer {
+  background: var(--surface);
+  color: var(--text);
+  border-color: var(--line);
+}
+[data-theme="dark"] .conversation,
+[data-theme="dark"] .composer-area,
+[data-theme="dark"] .auth-screen { background: var(--canvas); }
+[data-theme="dark"] .search,
+[data-theme="dark"] .count,
+[data-theme="dark"] .setup-notice { background: var(--raised); color: var(--secondary); border-color: var(--line); }
+[data-theme="dark"] .contact:hover,
+[data-theme="dark"] .icon-button:hover,
+[data-theme="dark"] .text-button:hover,
+[data-theme="dark"] .theme-toggle:hover { background: var(--hover); }
+[data-theme="dark"] .contact.selected { background: var(--selected); }
+[data-theme="dark"] .contact.selected:before { background: var(--accent); }
+[data-theme="dark"] .bubble { background: var(--raised); border-color: var(--line); box-shadow: none; }
+[data-theme="dark"] .sent .bubble { background: #304c39; border-color: #3c5e46; }
+[data-theme="dark"] .message-text,
+[data-theme="dark"] .composer textarea,
+[data-theme="dark"] .search input { color: var(--text); }
+[data-theme="dark"] .preview,
+[data-theme="dark"] .selected .preview,
+[data-theme="dark"] .contact-time,
+[data-theme="dark"] .contact-status,
+[data-theme="dark"] .profile-copy > span,
+[data-theme="dark"] .message-time,
+[data-theme="dark"] .sent .message-time,
+[data-theme="dark"] .composer-footer,
+[data-theme="dark"] .conversation-context,
+[data-theme="dark"] .date-divider,
+[data-theme="dark"] .list-heading,
+[data-theme="dark"] .empty-contacts,
+[data-theme="dark"] .empty-chat,
+[data-theme="dark"] .auth-card p,
+[data-theme="dark"] dialog p,
+[data-theme="dark"] .stack-form small,
+[data-theme="dark"] .stack-form .consent,
+[data-theme="dark"] .local-note,
+[data-theme="dark"] .local-note small { color: var(--secondary); }
+[data-theme="dark"] .search input::placeholder,
+[data-theme="dark"] .composer textarea::placeholder,
+[data-theme="dark"] .stack-form input::placeholder { color: #a5b5a7; opacity: 1; }
+[data-theme="dark"] .icon-button,
+[data-theme="dark"] .text-button,
+[data-theme="dark"] .theme-toggle,
+[data-theme="dark"] .brand-dot,
+[data-theme="dark"] .contact-status.is-online { color: var(--accent); }
+[data-theme="dark"] .call-button,
+[data-theme="dark"] .search kbd,
+[data-theme="dark"] .theme-toggle,
+[data-theme="dark"] .you-label { border-color: var(--line); }
+[data-theme="dark"] .you-label { color: var(--secondary); }
+[data-theme="dark"] .stack-form input:not([type="checkbox"]) { background: var(--canvas); color: var(--text); border-color: #617767; }
+[data-theme="dark"] .date-divider:before,
+[data-theme="dark"] .date-divider:after { background: var(--line); }
+[data-theme="dark"] .search:focus-within,
+[data-theme="dark"] .composer:focus-within { border-color: #90ba99; }
+[data-theme="dark"] :is(button, a, input):focus-visible { outline-color: #a1d3a6; }
+[data-theme="dark"] .messages,
+[data-theme="dark"] .contacts { scrollbar-color: #566f5b var(--canvas); }
+[data-theme="dark"] .avatar { background: #334837; color: #c2d9b8; }
+[data-theme="dark"] .avatar-peach { background: #503b2e; color: #e8c0a0; }
+[data-theme="dark"] .avatar-blue { background: #304451; color: #b2d1e5; }
+[data-theme="dark"] .avatar-pink { background: #4f3443; color: #e9bbcf; }
+[data-theme="dark"] .avatar-lavender { background: #403950; color: #d1bfe9; }
+[data-theme="dark"] .avatar-sand { background: #49432d; color: #d9cf9c; }
+[data-theme="dark"] .avatar-mint { background: #2f493e; color: #b1d7c5; }
+[data-theme="dark"] .avatar-rose { background: #513b36; color: #e4bdb0; }
+[data-theme="dark"] .presence { border-color: var(--surface); }
+[data-theme="dark"] .contact.selected .presence { border-color: var(--selected); }
+[data-theme="dark"] .unread { background: #92c38b; color: #132719; }
+[data-theme="dark"] .toast { background: #36533e; color: #f3f8f0; }
+[data-theme="dark"] .send-button:hover:not(:disabled) { background: #46875f; }
+[data-theme="dark"] dialog::backdrop { background: #080e0ab3; }
+[data-theme="dark"] ::selection { background: #50795b; color: #fff; }
+@media(max-height: 800px) and (min-width: 761px) {
+  .brand-row { margin-top: 24px; margin-bottom: 25px; }
+}
+@media(max-width: 760px) {
+  .brand-row { margin: 24px 26px 27px; }
+  .header-actions { gap: 6px; }
+}
+@media(max-width: 359px) {
+  .chat-header { gap: 6px; padding-right: 10px; }
+  .header-actions { gap: 4px; }
+  .header-info h2 { max-width: 95px; }
+}

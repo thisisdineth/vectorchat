@@ -37,3 +37,9 @@ Users sign in with phone OTP and choose a name. Share account IDs to start a cha
 There are no frontend frameworks, analytics, or third-party UI libraries. Message text is rendered with `textContent`. Firebase loads the required reCAPTCHA service for phone authentication. No API keys or credentials are committed.
 
 Presence, typing, visible read receipts, phone-number discovery, App Check, attachments, and WebRTC remain unimplemented. Message access is secured by Firebase rules, not end-to-end encryption. See the setup guide for limitations and next steps.
+
+## Appearance
+
+Use the **Dark mode** toggle on the sign-in screen or beside the Gather logo. Inside a chat, the moon/sun button is available next to the call buttons, including on mobile. Its pressed state indicates dark mode is enabled.
+
+Gather follows your system appearance until you choose a theme. Your choice is saved in this browser and survives reloads and logout; open tabs stay in sync. If browser storage is blocked, switching still works for the current page. Colors live in `src/theme.css`; `public/theme.js` applies the preference before the application loads to avoid a light flash. No Firebase records are changed.
